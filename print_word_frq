@@ -1,0 +1,35 @@
+install.packages("librarian")
+librarian::shelf(dplyr, KoNLP, rJava, memoise)
+
+# install.packages("dplyr")
+# library("KoNLP")
+# library("rJava")
+# library("memoise")
+# library("dplyr")
+
+#load dictionary
+useNIADic()
+
+sourceFileName <- "txt파일"
+targetFileName <- "원하는 파일명.csv"
+
+#create data frame
+data <- readLines(sourceFileName, encoding = "UTF-8")
+
+#delete invalid characters
+gsub("[[:punct:]]", " ", data)
+
+#extract nouns
+nouns <- extractNoun(data)
+#create frq. table
+wordcount <- table(unlist(nouns))
+#do dataframe
+dataset <- as.data.frame(wordcount, stringsAsFactors = F)
+##changing col name(dplyr)
+dataset <- rename(dataset,
+                  word = Var1,
+                  freq = Freq)
+#delete uni-text
+dataset <- filter(dataset, nchar(word) >= 2)
+
+write.csv(dataset, targetFileName)
